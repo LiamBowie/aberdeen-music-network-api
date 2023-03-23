@@ -28,8 +28,24 @@ app.use(passport.session());
 require('./server/passport')(passport);
 
 // Routes
-app.post('/login', (req, res) => {
-    console.log(req.body)
+app.post('/login', (req, res, next) => {
+    console.log('logging in');
+    passport.authenticate('local', (err, user, info) => {
+        if (err) throw err;
+        if (!user) res.json({
+            msg: "No User Exists"
+        });
+        else {
+            req.logIn(user, (err) => {
+                if (err) throw err;
+                res.json({
+                    msg: "Successfully Authenticated",
+                    user
+                });
+                console.log(req.user);
+            });
+        }
+    })(req, res, next);
 });
 
 app.post("/register", async (req, res) => {
@@ -45,11 +61,11 @@ app.post("/register", async (req, res) => {
           msg: "Something went wrong"
         });
     }
-    console.log(db.records);
 });
 
 app.get("/user", (req, res) => {
-    console.log(req.body)
+    console.log(req.data);
+    res.send(req.user);
 });
 
 

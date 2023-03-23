@@ -1,4 +1,5 @@
 const LocalStrategy = require('passport-local').Strategy;
+const db = require('../db');
 
 module.exports = passport => {
     
@@ -12,7 +13,7 @@ module.exports = passport => {
             });
         })
     );
-    
+
     passport.serializeUser((user, done) => {
         done(null, user.id);
     });
