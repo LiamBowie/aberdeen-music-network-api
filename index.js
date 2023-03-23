@@ -3,8 +3,8 @@ const morgan = require('morgan');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const db = require('./db');
+const localStrategy = require('./server/localStrategy');
+const db = require('./server/db');
 const PORT = process.env.PORT || 4001;
 const app = express();
 
@@ -25,7 +25,7 @@ app.use(morgan('short'));
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
-require('./server/passport')(passport);
+localStrategy(passport);
 
 // Routes
 app.post('/login', (req, res, next) => {
@@ -64,7 +64,6 @@ app.post("/register", async (req, res) => {
 });
 
 app.get("/user", (req, res) => {
-    console.log(req.data);
     res.send(req.user);
 });
 
