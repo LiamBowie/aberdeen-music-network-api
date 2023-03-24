@@ -3,7 +3,7 @@ const session = require('express-session');
 const cors = require('cors');
 const morgan = require('morgan');
 const passport = require('passport');
-const localStrategy = require('./server/localStrategy');
+const db = require('./server/db');
 const apiRouter = require('./server/api');
 const PORT = process.env.PORT || 4001;
 const app = express();
@@ -27,7 +27,6 @@ app.use(morgan('short'));
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
-localStrategy(passport);
 
 // Routes
 app.use('/api', apiRouter)
@@ -35,4 +34,5 @@ app.use('/api', apiRouter)
 // Start server
 app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
+    console.log(db.getRecords());
 });

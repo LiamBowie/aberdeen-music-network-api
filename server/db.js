@@ -12,13 +12,16 @@ let records = [
 ];
 
 const getNewId = (array) => {
-  // if (array.length > 0) {
-  //   return array[array.length - 1].id + 1;
-  // } else {
-  //   return 1;
-  // }
-  return array.length + 1;
+  if (array.length > 0) {
+    return array[array.length - 1].id + 1;
+  } else {
+    return 1;
+  }
 };
+
+exports.getRecords = () => {
+  return records;
+}
 
 exports.createUser = function (user) {
   return new Promise((resolve, reject) => {
@@ -27,7 +30,6 @@ exports.createUser = function (user) {
       ...user,
     };
     records = [newUser, ...records];
-    console.log(records);
     resolve(newUser);
   });
 };

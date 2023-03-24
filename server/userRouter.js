@@ -1,8 +1,33 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const db = require('./db');
 const userRouter = express.Router();
+
+/** Configure Passport */
+
+passport.use(new LocalStrategy(
+    function(username, password, done){
+        db.findByUsername(username, (err, user) => {
+        if(err) return done(err);
+        if(!user) return done(null, false);
+        if(user.password != password) return done(null, false);
+        return done(null, user);
+        });
+    })
+);
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+    db.findById(id, function (err, user) {
+        if (err) return done(err); 
+        done(null, user);
+    });
+});
 
 /** Utility functions */ 
 
@@ -27,7 +52,7 @@ userRouter.post("/register", async (req, res) => {
     const { username, password } = req.body;
     const hashedPassword = await passwordHash(password);
 
-    const newUser = await db.createUser({username, hashedPassword});
+    const newUser = await db.createUser({username, password});
     if(newUser) {
         res.status(201).json({
             msg: `User (${username}) successfully created!`,
@@ -40,23 +65,16 @@ userRouter.post("/register", async (req, res) => {
     }
 });
 
-userRouter.post('/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if (err) throw err;
-        if (!user) res.json({
-            msg: "No User Exists"
-        });
-        else {
-            req.logIn(user, (err) => {
-                if (err) throw err;
-                res.json({
-                    msg: "Successfully Authenticated",
-                    user
-                });
-                console.log(req.user);
-            });
-        }
-    })(req, res, next);
+userRouter.get('/login', (req, res, next) => {
+    res.status(401).json({ msg: 'Failed to authenticate' });
+});
+
+userRouter.post('/login', 
+    passport.authenticate('local', { 
+        failureRedirect: 'login' 
+    }),
+    function(req, res) {
+        res.status(200).json({msg: 'logged in'});
 });
 
 module.exports = userRouter;
