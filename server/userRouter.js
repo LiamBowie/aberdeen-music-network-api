@@ -50,23 +50,22 @@ userRouter.get("/", (req, res) => {
 
 userRouter.post("/register", async (req, res) => {
     const { username, password } = req.body;
-    bcrypt.hash(password, 10)
-        .then(hash => { 
-            const newUser = db.createUser({username, hash})
-            .then(newUser => {
-                if(newUser) {
-                    res.status(201).json({
-                        msg: `User (${username}) successfully created!`,
-                        newUser
-                    })
-                    console.log(db.getRecords());
-                } else { 
-                    res.status(500).json({
-                      msg: "Something went wrong"
-                    });
-                }
-            })
-    });
+    const hash = await bcrypt.hash(password, 10) 
+    const newUser = await db.createUser({username, hash})
+
+    if(newUser) {
+        res.status(201).json({
+            msg: `User (${username}) successfully created!`,
+            newUser
+        })
+        console.log(db.getRecords());
+    } else { 
+        res.status(500).json({
+            msg: "Something went wrong"
+        });
+    }
+
+
 });
 
 userRouter.get('/login', (req, res, next) => {
