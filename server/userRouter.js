@@ -9,10 +9,12 @@ const userRouter = express.Router();
 
 passport.use(new LocalStrategy(
     function(username, password, done){
-        db.findByUsername(username, (err, user) => {
+        db.findByUsername(username, async (err, user) => {
         if(err) return done(err);
         if(!user) return done(null, false);
-        if(user.password != password) return done(null, false);
+
+        const match = await bcrypt.compare(password, user.password);
+        if(!match) return done(null, false);
         return done(null, user);
         });
     })
@@ -38,7 +40,7 @@ userRouter.get("/", (req, res) => {
 userRouter.post("/register", async (req, res) => {
     const { username, password } = req.body;
     const hash = await bcrypt.hash(password, 10) 
-    const newUser = await db.createUser({username, hash})
+    const newUser = await db.createUser({username, password: hash})
 
     if(newUser) {
         res.status(201).json({
@@ -51,19 +53,17 @@ userRouter.post("/register", async (req, res) => {
             msg: "Something went wrong"
         });
     }
+});
 
-
+userRouter.post('/login', 
+passport.authenticate('local', { failureRedirect: 'login' 
+}),
+(req, res) => {
+    res.status(200).json({msg: 'logged in'});
 });
 
 userRouter.get('/login', (req, res, next) => {
     res.status(401).json({ msg: 'Failed to authenticate' });
-});
-
-userRouter.post('/login', 
-    passport.authenticate('local', { failureRedirect: 'login' 
-    }),
-    (req, res) => {
-        res.status(200).json({msg: 'logged in'});
 });
 
 module.exports = userRouter;

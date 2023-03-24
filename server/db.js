@@ -1,13 +1,8 @@
 let records = [
   {
     id: 1,
-    username: "Lain",
-    password: "MrBigDeal",
-  },
-  {
-    id: 2,
     username: "Admin",
-    password: "Password",
+    password: "$2b$10$4nYzYFAi2UpCgKMKOwRcXOB8.bo6vwDM36I9CrTFULvHJhUbWZv3.", // "Password"
   },
 ];
 
@@ -29,7 +24,7 @@ exports.createUser = function (user) {
       id: getNewId(records),
       ...user,
     };
-    records = [newUser, ...records];
+    records = [...records, newUser];
     resolve(newUser);
   });
 };
