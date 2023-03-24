@@ -29,19 +29,6 @@ passport.deserializeUser((id, done) => {
     });
 });
 
-/** Utility functions */ 
-
-const passwordHash = async (password) => {
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
-        return hash;
-    } catch (err) {
-        console.log(err);
-    }
-    return null;
-}
-
 /** Routes */
 
 userRouter.get("/", (req, res) => {
